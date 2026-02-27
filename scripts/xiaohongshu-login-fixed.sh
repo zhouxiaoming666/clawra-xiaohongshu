@@ -9,8 +9,8 @@ QR_CODE_DIR="$SCRIPT_DIR/../qrcode"
 COOKIES_FILE="$STORAGE_DIR/cookies.json"
 
 # 清理并创建目录
-rm -f "$COOKIES_FILE"  # 删除可能是目录的 cookies.json
-rm -rf "$COOKIES_FILE"
+rm -rf "$STORAGE_DIR/cookies.json"  # 删除可能是文件或目录的 cookies.json
+rm -rf "$QR_CODE_DIR"
 mkdir -p "$STORAGE_DIR" "$QR_CODE_DIR"
 
 echo "=========================================="
@@ -76,13 +76,13 @@ console.log('启动浏览器（无头模式）...');
         console.log('已在登录页或未找到登录按钮');
     }
     
-    // 截图保存二维码
+    // 截图保存二维码到 qrcode 目录
     console.log('截取二维码...');
     const qrPath = path.join(QR_CODE_DIR, 'login-qr.png');
     await page.screenshot({ path: qrPath, fullPage: true });
     console.log(`✓ 二维码已保存：${qrPath}`);
     
-    // 尝试查找二维码元素
+    // 尝试查找二维码元素并截图
     try {
         const qrElement = await page.$('canvas, img[src*="qr"], .qrcode');
         if (qrElement) {
@@ -117,10 +117,9 @@ console.log('启动浏览器（无头模式）...');
     // 保存 cookies
     const cookies = await context.cookies();
     if (cookies.length > 0) {
-        // 确保保存到正确的文件路径
-        const absPath = path.resolve(COOKIES_FILE);
-        fs.writeFileSync(absPath, JSON.stringify(cookies, null, 2));
-        console.log(`\n✓ Cookies 已保存到：${absPath}`);
+        // 使用传入的绝对路径，确保是文件不是目录
+        fs.writeFileSync(COOKIES_FILE, JSON.stringify(cookies, null, 2));
+        console.log(`\n✓ Cookies 已保存到：${COOKIES_FILE}`);
         console.log(`✓ 共保存 ${cookies.length} 个 cookies`);
         
         // 输出 cookies 文件内容预览

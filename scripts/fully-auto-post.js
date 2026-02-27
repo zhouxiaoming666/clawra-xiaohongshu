@@ -1,28 +1,3 @@
-#!/bin/bash
-# 小红书完全自动化发布脚本（无头浏览器 + 持久化登录）
-
-set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-STORAGE_DIR="$SCRIPT_DIR/../storage"
-COOKIES_FILE="$STORAGE_DIR/cookies.json"
-
-echo "=========================================="
-echo "📕 小红书完全自动化发布系统"
-echo "=========================================="
-echo ""
-
-# 检查 cookies
-if [ ! -f "$COOKIES_FILE" ]; then
-    echo "❌ 未检测到登录状态，请先扫码登录"
-    echo "运行：bash scripts/xiaohongshu-login-fixed.sh"
-    exit 1
-fi
-
-echo "✓ 检测到登录状态"
-
-# 创建完全自动化的 Node.js 发布脚本
-cat > "$SCRIPT_DIR/fully-auto-post.js" << 'EOFNODE'
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
@@ -118,9 +93,9 @@ LOOK 3️⃣：旗袍中国风 🇨🇳 东方韵味
         console.log(`✓ 加载了 ${cookies.length} 个 cookies\n`);
     }
     
-    console.log('启动浏览器（有头模式 - 便于调试）...');
+    console.log('启动浏览器（无头模式）...');
     const browser = await chromium.launch({
-        headless: false,  // 有头模式，便于查看问题
+        headless: true,  // 无头模式
         args: [
             '--window-size=1920,1080',
             '--no-sandbox',
@@ -269,13 +244,3 @@ LOOK 3️⃣：旗袍中国风 🇨🇳 东方韵味
     await browser.close();
     console.log('\n✅ 所有笔记发布完成！');
 })();
-EOFNODE
-
-# 设置环境变量并运行
-export COOKIES_FILE="$COOKIES_FILE"
-node "$SCRIPT_DIR/fully-auto-post.js"
-
-echo ""
-echo "=========================================="
-echo "发布流程完成！"
-echo "=========================================="
